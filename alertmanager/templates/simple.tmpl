@@ -1,0 +1,17 @@
+
+{{ define "discord.example.text" -}}
+    {{ range .Alerts }}
+        {{- if .Annotations.message }}
+            {{ .Annotations.message }}
+        {{- end }}
+        {{- if .Annotations.description }}
+            {{ .Annotations.description }}
+        {{- end }}
+    {{- end }}
+{{- end }}
+
+{{ define "discord.example.title" -}}
+    {{- if .Annotations.title }}
+        {{ .Annotations.title }}
+    {{- end}}
+{{- end }}

@@ -1,0 +1,26 @@
+global:
+  # The smarthost and SMTP sender used for mail notifications.
+  # smtp_smarthost: 'localhost:<port>'
+  # smtp_from: 'alert@monitoring.com'
+  # smtp_auth_username: 'alertmanager'
+  # smtp_auth_password: 'passwd'
+
+# The directory from which notification templates are read.
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# The root route on which each incoming alert enters.
+route:
+  group_by: ['alertname']
+  group_wait: 20s
+  group_interval: 5m
+  repeat_interval: 5h
+  receiver: discord
+
+receivers:
+  # - name: 'discord'
+  #  webhook_configs:
+  #    - url: 'http://localhost:<port>'
+  # check this link -> https://github:com/rossigee/alertmanager/tree/add-discord-support:
+
+# template inspiration -> https://gist.github.com/milesbxf/e2744fc90e9c41b47aa47925f8ff6512/revisions

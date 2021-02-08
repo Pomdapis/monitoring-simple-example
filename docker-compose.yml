@@ -1,0 +1,95 @@
+version: '3.7'
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
+  alertmanager_data: {}
+
+services:
+
+  grafana:
+    image: grafana/grafana:7.0.3
+    user: "472"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+      - /etc/hosts:/etc/hosts
+    links:
+      - prometheus:prometheus
+    depends_on:
+      - prometheus
+    restart: always
+    ports:
+      - 3000:3000
+
+  prometheus:
+    image: prom/prometheus:v2.1.0
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - /etc/hosts:/etc/hosts
+      - prometheus_data:/prometheus
+    links:
+      - blackbox:blackbox
+      - alertmanager:alertmanager
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    restart: always
+    ports:
+      - 9090:9090
+
+  alertmanager:
+    image: prom/alertmanager:v0.21.0
+    volumes:
+      - ./alertmanager:/etc/alertmanager
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+    restart: always
+    ports:
+      - 9093:9093
+
+  nodeexporter:
+    image: prom/node-exporter:v0.18.1
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run:/var/run:rw
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /:/rootfs:ro,rslave
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--collector.textfile.directory=/var/lib/node_exporter/textfile_collector/'
+    restart: always
+    ports:
+      - 9100:9100
+
+  cadvisor:
+    image: gcr.io/google-containers/cadvisor:v0.35.0
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    restart: always
+    ports:
+      - 8080:8080
+
+  blackbox:
+    image: prom/blackbox-exporter:v0.16.0
+    volumes:
+      - ./prometheus/blackbox:/etc/prometheus/blackbox/targets/
+      - ./prometheus/blackbox/blackbox.yml:/etc/blackbox_exporter/blackbox.yml
+    command: [
+        '--config.file=/etc/blackbox_exporter/blackbox.yml'
+    ]
+    restart: always
+    ports:
+      - 9115:9115
+
