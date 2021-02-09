@@ -43,5 +43,5 @@ scrape_configs:
     scheme: http
     static_configs:
       - targets:
-          - 'node:9100'
+          - 'nodeexporter:9100'
           # Add targets for node exporter
