@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.3'
 
 volumes:
   prometheus_data: {}
@@ -57,15 +57,12 @@ services:
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
-      - /var/run:/var/run:rw
-      - /var/lib/docker/:/var/lib/docker:ro
       - /:/rootfs:ro,rslave
     command:
       - '--path.procfs=/host/proc'
       - '--path.rootfs=/rootfs'
       - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
-      - '--collector.textfile.directory=/var/lib/node_exporter/textfile_collector/'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)' 
     restart: always
     ports:
       - 9100:9100
